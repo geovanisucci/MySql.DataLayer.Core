@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Dapper;
 using MySql.Data.MySqlClient;
 
 namespace MySql.DataLayer.Core.Repository
@@ -12,10 +13,10 @@ namespace MySql.DataLayer.Core.Repository
     public interface IMySqlDataRepository<TEntity>
         where TEntity : IDataEntity
     {
-        Task<List<TEntity>> GetAllAsync();
-        Task<List<TEntity>> GetAllAsync(MySqlConnection connection, MySqlTransaction transaction = null);
+        Task<List<TResult>> GetAllAsync<TResult>(ColumnTable[] columns, ConditionSearch[] conditionsSearch = null)
+            where TResult : class;
+        Task<List<TEntity>> GetAllAsync(ConditionSearch[] conditionsSearch = null);
         Task<TEntity> GetAsync(object id);
-        Task<TEntity> GetAsync(object id, MySqlConnection connection, MySqlTransaction transaction = null);
         Task<int> CreateAsync(TEntity entity, bool IsPkAutoIncrement = false);
         Task<int> CreateAsync(TEntity entity, MySqlConnection connection, bool IsPkAutoIncrement = false, MySqlTransaction transaction = null);
         Task<int> UpdateAsync(TEntity entity);
