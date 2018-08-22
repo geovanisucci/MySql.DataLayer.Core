@@ -316,14 +316,82 @@ namespace MySql.DataLayer.Core.Repository
             throw new System.NotImplementedException();
         }
 
-        public Task<int> UpdateAsync(TEntity entity)
+        public async Task<int> UpdateAsync(TEntity entity)
         {
-            throw new System.NotImplementedException();
+            int result = 0;
+            using (var connection = await _connectionFactory.GetAsync())
+            {
+                result = await UpdateAsync(entity, connection);
+            }
+
+            return result;
         }
 
-        public Task<int> UpdateAsync(TEntity entity, MySqlConnection connection, MySqlTransaction transaction = null)
+        public async Task<int> UpdateAsync(TEntity entity, MySqlConnection connection, MySqlTransaction transaction = null)
         {
-            throw new System.NotImplementedException();
+
+            string pkColumnName = Utilities.GetPkColumnName<TEntity>(false);
+
+            if (string.IsNullOrEmpty(pkColumnName))
+                throw new NotImplementedException(
+                         $"ITable: {typeof(TEntity)} does not implement {typeof(PKAttribute)}."
+                     );
+
+            var _parameters = new List<QueryParameter>();
+            StringBuilder _sql = new StringBuilder();
+            string tableName = Utilities.GetTableName<TEntity>();
+            List<string> columns = new List<string>();
+            DynamicParameters dapperParameters = new DynamicParameters();
+
+            var properties = Utilities.GetProperties<TEntity>();
+
+            object id = null;
+
+            properties.ForEach(prop =>
+            {
+
+                if (!Utilities.IsKeyProperty(prop))
+                {
+                    columns.Add(Utilities.GetColumnName<TEntity>(prop).Replace($"{tableName}.", ""));
+                    var paramName = Utilities.GetColumnName<TEntity>(prop).Replace($"{tableName}.", "").Replace("`", "");
+
+                    var itemValue = prop.GetValue(entity);
+                    if (prop.GetValue(entity) == null)
+                        itemValue = DBNull.Value;
+
+                    _parameters.Add(new QueryParameter { ParameterName = $"@{paramName}", ParameterValue = itemValue });
+                }
+                else
+                {
+                    id = prop.GetValue(entity);
+                }
+            });
+
+            _sql.Append($"update {tableName} set ");
+            bool first = true;
+            foreach (var item in _parameters)
+            {
+                if (first)
+                {
+                    _sql.Append($"{item.ParameterName.Replace("@", "")} = {item.ParameterName} ");
+                }
+                else
+                {
+                    _sql.Append($", {item.ParameterName.Replace("@", "")} = {item.ParameterName} ");
+                }
+
+                first = false;
+            }
+
+            _sql.Append($" Where {pkColumnName} = @{Utilities.GetPkColumnName<TEntity>(false)}");
+
+            dapperParameters.Add(pkColumnName, id);
+
+            _parameters.ForEach(p => dapperParameters.Add(p.ParameterName, p.ParameterValue));
+
+            var s = _sql.ToString();
+
+            return await connection.ExecuteAsync(_sql.ToString(), dapperParameters, transaction);
         }
 
 

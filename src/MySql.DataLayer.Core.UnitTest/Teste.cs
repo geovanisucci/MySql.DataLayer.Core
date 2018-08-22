@@ -44,12 +44,13 @@ namespace MySql.DataLayer.Core.UnitTest
             var ppp = r.GetAsync(1);
 
             Foo f = new Foo();
-            f.Id = 2;
+            f.Id = 5;
             f.id_country =1;
-            f.initials = "RJ";
-            f.name = "Rio";
+            f.initials = "RS";
+            f.name = "Rio Sul";
 
-            r.CreateAsync(f, true).Wait();
+            r.UpdateAsync(f).Wait();
+            //r.CreateAsync(f, true).Wait();
         
         }
     }
