@@ -2,7 +2,7 @@ namespace MySql.DataLayer.Core.Attributes.StoredProcedureConfig.StoredProcedure
 {
      using System;
 
-    [AttributeUsage(AttributeTargets.Property, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
     public class StoredProcedureNameAttribute : Attribute
     {
         /// <summary>

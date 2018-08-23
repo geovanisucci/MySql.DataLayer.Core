@@ -5,7 +5,7 @@ namespace MySql.DataLayer.Core.Attributes.EntityConfig.Table
     public class TableNameAttribute : Attribute 
     {
         /// <summary>
-        /// The real table name in database.
+        /// The real table mapped name in database.
         /// </summary>
         /// <value></value>
         public string Name { get; private set; }

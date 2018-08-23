@@ -13,12 +13,14 @@ namespace MySql.DataLayer.Core.Repository
     using MySql.DataLayer.Core.Utils;
     using System.Data;
 
+    /// <summary>
+    /// Implementation of IMySqlDataRepository with the basic CRUD operations using Dapper Framework.
+    /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
     public abstract class BaseMySqlRepository<TEntity> : IMySqlDataRepository<TEntity>
         where TEntity : IDataEntity
     {
         private readonly IMySqlConnectionFactory _connectionFactory;
-
-
 
         /// <summary>
         /// The default constructor for BaseMySqlRepository.
@@ -28,8 +30,13 @@ namespace MySql.DataLayer.Core.Repository
         {
             _connectionFactory = connectionFactory;
         }
-
-        public async Task<int> CreateAsync(TEntity entity, bool IsPkAutoIncrement = false)
+        /// <summary>
+        /// Provides the insert statement.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="IsPkAutoIncrement"></param>
+        /// <returns></returns>
+        public virtual async Task<int> CreateAsync(TEntity entity, bool IsPkAutoIncrement = false)
         {
             int result = 0;
             using (var connection = await _connectionFactory.GetAsync())
@@ -40,8 +47,15 @@ namespace MySql.DataLayer.Core.Repository
             return result;
 
         }
-
-        public async Task<int> CreateAsync(TEntity entity, MySqlConnection connection, bool IsPkAutoIncrement = false, MySqlTransaction transaction = null)
+        /// <summary>
+        /// Provides the insert statement.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="connection"></param>
+        /// <param name="IsPkAutoIncrement"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        public virtual async Task<int> CreateAsync(TEntity entity, MySqlConnection connection, bool IsPkAutoIncrement = false, MySqlTransaction transaction = null)
         {
             var _parameters = new List<QueryParameter>();
             StringBuilder _sql = new StringBuilder();
@@ -87,48 +101,12 @@ namespace MySql.DataLayer.Core.Repository
             return await connection.ExecuteAsync(_sql.ToString(), dapperParameters, transaction);
 
         }
-
-        public Task ExecuteStoredProcedureAsync<TProcedure>() where TProcedure : IDataStoredProcedure
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task ExecuteStoredProcedureAsync<TProcedure>(MySqlConnection connection, MySqlTransaction transaction = null) where TProcedure : IDataStoredProcedure
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<List<TProcedure>> ExecuteStoredProcedureReturnListAsync<TProcedure>() where TProcedure : IDataStoredProcedure
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<List<TProcedure>> ExecuteStoredProcedureReturnListAsync<TProcedure>(MySqlConnection connection, MySqlTransaction transaction = null) where TProcedure : IDataStoredProcedure
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<object> ExecuteStoredProcedureReturnObjectAsync<TProcedure>() where TProcedure : IDataStoredProcedure
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<object> ExecuteStoredProcedureReturnObjectAsync<TProcedure>(MySqlConnection connection, MySqlTransaction transaction) where TProcedure : IDataStoredProcedure
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<List<TView>> ExecuteView<TView>() where TView : IDataView
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<List<TView>> ExecuteView<TView>(MySqlConnection connection, MySqlTransaction transaction = null) where TView : IDataView
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public async Task<List<TEntity>> GetAllAsync(ConditionSearch[] conditionsSearch = null)
+        /// <summary>
+        /// Provides the Select operation to get a list for mapped data.
+        /// </summary>
+        /// <param name="conditionsSearch"></param>
+        /// <returns></returns>
+        public virtual async Task<List<TEntity>> GetAllAsync(ConditionSearch[] conditionsSearch = null)
         {
             List<TEntity> result = new List<TEntity>();
             using (var connection = await _connectionFactory.GetAsync())
@@ -192,8 +170,14 @@ namespace MySql.DataLayer.Core.Repository
 
             return result;
         }
-
-        public async Task<List<TResult>> GetAllAsync<TResult>(ColumnTable[] columns, ConditionSearch[] conditionsSearch = null)
+        /// <summary>
+        ///   Provides the Select operation to get a list for unmapped data.
+        /// </summary>
+        /// <param name="columns"></param>
+        /// <param name="conditionsSearch"></param>
+        /// <typeparam name="TResult"></typeparam>
+        /// <returns></returns>
+        public virtual async Task<List<TResult>> GetAllAsync<TResult>(ColumnTable[] columns, ConditionSearch[] conditionsSearch = null)
             where TResult : class
         {
             List<TResult> result = new List<TResult>();
@@ -277,7 +261,12 @@ namespace MySql.DataLayer.Core.Repository
 
             return result;
         }
-        public async Task<TEntity> GetAsync(object id)
+        /// <summary>
+        /// Provides the Select operation to geta single mapped data.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public virtual async Task<TEntity> GetAsync(object id)
         {
             TEntity result = default(TEntity);
             using (var connection = await _connectionFactory.GetAsync())
@@ -304,19 +293,60 @@ namespace MySql.DataLayer.Core.Repository
 
             return result;
         }
-
-
-        public Task<int> RemoveAsync(object id)
+        /// <summary>
+        /// Provides the delete statement.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public virtual async Task<int> RemoveAsync(object id)
         {
-            throw new System.NotImplementedException();
-        }
+            int result = 0;
+            using (var connection = await _connectionFactory.GetAsync())
+            {
+                result = await RemoveAsync(id, connection);
+            }
 
-        public Task<int> RemoveAsync(object id, MySqlConnection connection, MySqlTransaction transaction = null)
+            return result;
+        }
+        /// <summary>
+        /// Provides the delete statement.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        public virtual async Task<int> RemoveAsync(object id, MySqlConnection connection, MySqlTransaction transaction = null)
         {
-            throw new System.NotImplementedException();
-        }
 
-        public async Task<int> UpdateAsync(TEntity entity)
+            StringBuilder sql = new StringBuilder();
+
+            string pkColumnName = Utilities.GetPkColumnName<TEntity>(false);
+
+            if (string.IsNullOrEmpty(pkColumnName))
+                throw new NotImplementedException(
+                         $"ITable: {typeof(TEntity)} does not implement {typeof(PKAttribute)}."
+                     );
+
+            string tableName = Utilities.GetTableName<TEntity>();
+
+            sql.Append($"Delete from {tableName} Where {pkColumnName} = @{Utilities.GetPkColumnName<TEntity>(false)}");
+
+
+            DynamicParameters parameters = new DynamicParameters();
+
+            parameters.Add(pkColumnName, id);
+
+
+            return await connection.ExecuteAsync(sql.ToString(), parameters, transaction);
+
+
+        }
+        /// <summary>
+        /// Provides the update statement.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public virtual async Task<int> UpdateAsync(TEntity entity)
         {
             int result = 0;
             using (var connection = await _connectionFactory.GetAsync())
@@ -326,8 +356,14 @@ namespace MySql.DataLayer.Core.Repository
 
             return result;
         }
-
-        public async Task<int> UpdateAsync(TEntity entity, MySqlConnection connection, MySqlTransaction transaction = null)
+        /// <summary>
+        /// Provides the update statement.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        public virtual async Task<int> UpdateAsync(TEntity entity, MySqlConnection connection, MySqlTransaction transaction = null)
         {
 
             string pkColumnName = Utilities.GetPkColumnName<TEntity>(false);
@@ -389,11 +425,7 @@ namespace MySql.DataLayer.Core.Repository
 
             _parameters.ForEach(p => dapperParameters.Add(p.ParameterName, p.ParameterValue));
 
-            var s = _sql.ToString();
-
             return await connection.ExecuteAsync(_sql.ToString(), dapperParameters, transaction);
         }
-
-
     }
 }
