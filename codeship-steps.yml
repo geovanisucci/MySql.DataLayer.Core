@@ -1,0 +1,6 @@
+- name: Build
+  type: serial
+  steps:
+    - name: Run Tests
+      service: testrunner
+      command: bash -c "cd ../MySql.DataLayer.Core.UnitTest && dotnet test -v n"
