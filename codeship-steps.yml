@@ -3,4 +3,4 @@
   steps:
     - name: Run Tests
       service: testrunner
-      command: bash -c "cd src/MySql.DataLayer.Core.UnitTest && dotnet test"
+      command: bash -c "cd ../MySql.DataLayer.Core.UnitTest && dotnet test -v n"
