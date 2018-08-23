@@ -5,12 +5,14 @@ namespace MySql.DataLayer.Core.Utils
     using System.Reflection;
     using System;
     using MySql.DataLayer.Core.Attributes.EntityConfig.Table;
+    using MySql.DataLayer.Core.Attributes.StoredProcedureConfig.StoredProcedure;
 
     public class Utilities
     {
         private static Dictionary<string, string> _columnNames = new Dictionary<string, string>();
         private static Dictionary<string, string> _pkColumnName = new Dictionary<string, string>();
         private static Dictionary<Type, string> _tableNames = new Dictionary<Type, string>();
+        private static Dictionary<Type, string> _storedProcedureNames = new Dictionary<Type, string>();
         public static string ConditionToString(Condition condition)
         {
             switch (condition)
@@ -80,6 +82,12 @@ namespace MySql.DataLayer.Core.Utils
             Type type = typeof(T);
             return GetTableName(type);
         }
+
+        public static string GetStoredProcedureName<T>() where T : IDataStoredProcedure
+        {
+            Type type = typeof(T);
+            return GetStoredProcedureName(type);
+        }
         public static string GetTableName(Type type)
         {
             string name = null;
@@ -98,6 +106,27 @@ namespace MySql.DataLayer.Core.Utils
                 }
                 name = $"`{name}`";
                 _tableNames.Add(type, name);
+            }
+            return name;
+        }
+
+        public static string GetStoredProcedureName(Type type)
+        {
+            string name = null;
+            _storedProcedureNames.TryGetValue(type, out name);
+            if (name == null)
+            {
+                var attribute = type.GetCustomAttribute<StoredProcedureNameAttribute>();
+                if (attribute == null)
+                {
+                    name = type.Name;
+                }
+                else
+                {
+                    name = attribute.Name;
+                }
+                name = $"`{name}`";
+                _storedProcedureNames.Add(type, name);
             }
             return name;
         }
