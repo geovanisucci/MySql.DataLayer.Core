@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySql.DataLayer.Core", "MySql.DataLayer.Core\MySql.DataLayer.Core.csproj", "{C9B2E719-2C8B-4BA9-9777-0A9E720CC943}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySql.DataLayer.Core.unitTest", "MySql.DataLayer.Core.UnitTest\MySql.DataLayer.Core.unitTest.csproj", "{8D492A66-A9C3-4693-BAC0-E9AEB5A741E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySql.DataLayer.Core.UnitTest", "MySql.DataLayer.Core.UnitTest\MySql.DataLayer.Core.UnitTest.csproj", "{8D492A66-A9C3-4693-BAC0-E9AEB5A741E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
