@@ -1,0 +1,18 @@
+testrunner:
+  build:
+    dockerfile_path: ./Dockerfile
+  volumes:
+    - ./src:/src
+  depends_on:
+    - mysql
+  environment:
+    MYSQL_HOST: mysql
+
+mysql:
+  image: mysql/mysql-server:5.7
+  environment:
+    MYSQL_USER: root
+    MYSQL_ROOT_PASSWORD: developer
+    MYSQL_ROOT_HOST: '%'
+  healthcheck:
+    test: mysql -u root -p$MYSQL_ROOT_PASSWORD -h 127.0.0.1 -e 'select 1' ||exit 1
