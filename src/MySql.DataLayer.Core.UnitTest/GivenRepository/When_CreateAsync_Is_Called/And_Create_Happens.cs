@@ -10,15 +10,29 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_CreateAsync_Is_Call
     using MySql.DataLayer.Core.Attributes.StoredProcedureConfig.StoredProcedure;
     public class And_Create_Happens
     {
+
+        IMySqlConnectionFactory _connectionFactory;
+        Repository _repository;
+
         [SetUp]
         public void Setup()
         {
+            Database.Create(out _connectionFactory);
+            _repository = new Repository(_connectionFactory);
+        }
 
+        [TearDown]
+        public virtual void TearDown()
+        {
+            Database.Drop(_connectionFactory);
         }
 
         [Test]
         public void Should_Return_Success()
         {
+
+
+
             var test1 = 1;
             var test2 = 1;
 
