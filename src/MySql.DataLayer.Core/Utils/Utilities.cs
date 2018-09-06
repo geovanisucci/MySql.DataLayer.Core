@@ -195,7 +195,5 @@ namespace MySql.DataLayer.Core.Utils
             return propertyInfo.GetCustomAttributes(false).ToList().
                         Where(x => x.GetType().Name == "PKAttribute").FirstOrDefault() != null;
         }
-
-
     }
 }

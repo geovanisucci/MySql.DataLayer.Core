@@ -78,5 +78,14 @@ namespace MySql.DataLayer.Core.Repository
         /// <param name="transaction"></param>
         /// <returns></returns>
         Task<int> RemoveAsync(object id, MySqlConnection connection, MySqlTransaction transaction = null);
+
+        /// <summary>
+        /// Provides the execution of a StoredProcedure to get a list for mapped data
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="queryParameters"></param>
+        /// <returns></returns>
+        Task<List<TResult>> ExecuteStoredProcedure<TResult>(QueryParameter[] queryParameters = null)
+                    where TResult : IDataStoredProcedure;
     }
 }
