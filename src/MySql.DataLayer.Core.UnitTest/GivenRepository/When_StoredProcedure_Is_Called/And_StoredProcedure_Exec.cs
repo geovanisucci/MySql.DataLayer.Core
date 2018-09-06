@@ -19,9 +19,13 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_StoredProcedure_Is_
         [SetUp]
         public void Setup()
         {
+            if (Environment.GetEnvironmentVariable("MYSQL_HOST") == null)
+            {
+                Environment.SetEnvironmentVariable("MYSQL_HOST", "192.168.99.100");
+            }
             Database.Create(out _connectionFactory);
             Database.CreateFooTable(_connectionFactory);
-            Database.InsertFooTable(_connectionFactory,100);
+            Database.InsertFooTable(_connectionFactory, 100);
             Database.CreateFooStoredProcedureWithParameter(_connectionFactory);
 
             _repository = new Repository(_connectionFactory);
@@ -37,7 +41,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_StoredProcedure_Is_
                 ParameterValue = "50"
             });
 
-            List<FooStoredProcedureWithParameter> resultList = 
+            List<FooStoredProcedureWithParameter> resultList =
                                             await _repository.ExecuteStoredProcedure<FooStoredProcedureWithParameter>(queryParameters.ToArray());
 
             Assert.IsTrue(resultList != null);

@@ -7,6 +7,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
 {
     public class Database
     {
+         
         public static void Create(out IMySqlConnectionFactory conn)
         {
 
@@ -95,7 +96,8 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
 
         public static string GetConnectionString()
         {
-            return "Server=mysql;DataBase=sys;Uid=root;Pwd=developer;Pooling=True;Allow User Variables=true";
+            return  $@"Server={Environment.GetEnvironmentVariable("MYSQL_HOST")};User=root;Password=developer;";
+           // return "Server=mysql;DataBase=sys;Uid=root;Pwd=developer;Pooling=True;Allow User Variables=true";
         }
         public static string GetDatabaseNameString()
         {
