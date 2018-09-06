@@ -22,6 +22,8 @@ namespace MySql.DataLayer.Core.Repository
     {
         private readonly IMySqlConnectionFactory _connectionFactory;
 
+        private readonly string _databaseName;
+
         /// <summary>
         /// The default constructor for BaseMySqlRepository.
         /// </summary>
@@ -29,7 +31,9 @@ namespace MySql.DataLayer.Core.Repository
         public BaseMySqlRepository(IMySqlConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
+            _databaseName = _connectionFactory.GetDatabaseName();
         }
+
         /// <summary>
         /// Provides the insert statement.
         /// </summary>
@@ -94,7 +98,7 @@ namespace MySql.DataLayer.Core.Repository
                 }
             });
 
-            _sql.Append($"insert into {tableName} ({String.Join(",", columns)}) values ({String.Join(",", _parameters.Select(p => p.ParameterName))})");
+            _sql.Append($"insert into {_databaseName}.{tableName} ({String.Join(",", columns)}) values ({String.Join(",", _parameters.Select(p => p.ParameterName))})");
 
             _parameters.ForEach(p => dapperParameters.Add(p.ParameterName, p.ParameterValue));
 
@@ -117,7 +121,7 @@ namespace MySql.DataLayer.Core.Repository
                 if (conditionsSearch == null)
                 {
 
-                    sql.Append($"Select * From {Utilities.GetTableName<TEntity>()}");
+                    sql.Append($"Select * From {_databaseName}.{Utilities.GetTableName<TEntity>()}");
 
 
                     result = await connection
@@ -133,7 +137,7 @@ namespace MySql.DataLayer.Core.Repository
 
                     DynamicParameters parameters = new DynamicParameters();
 
-                    sql.Append($"Select * From {Utilities.GetTableName<TEntity>()}");
+                    sql.Append($"Select * From {_databaseName}.{Utilities.GetTableName<TEntity>()}");
 
 
                     bool first = true;
@@ -192,14 +196,14 @@ namespace MySql.DataLayer.Core.Repository
 
                         if (columns.Count() > 0)
                         {
-                            sql.Append($"Select {String.Join<ColumnTable>(",", columns)} From {Utilities.GetTableName<TEntity>()}");
+                            sql.Append($"Select {String.Join<ColumnTable>(",", columns)} From {_databaseName}.{Utilities.GetTableName<TEntity>()}");
                         }
 
                         else
                             throw new Exception("The columns parameter it not filled.");
                     }
                     else
-                        sql.Append($"Select * From {Utilities.GetTableName<TEntity>()}");
+                        sql.Append($"Select * From {_databaseName}.{Utilities.GetTableName<TEntity>()}");
 
                     var s = sql.ToString();
 
@@ -219,12 +223,12 @@ namespace MySql.DataLayer.Core.Repository
                     if (columns != null)
                     {
                         if (columns.Count() > 0)
-                            sql.Append($"Select {string.Join<ColumnTable>(",", columns)} From {Utilities.GetTableName<TEntity>()}");
+                            sql.Append($"Select {string.Join<ColumnTable>(",", columns)} From {_databaseName}.{Utilities.GetTableName<TEntity>()}");
                         else
                             throw new Exception("The columns parameter it not filled.");
                     }
                     else
-                        sql.Append($"Select * From {Utilities.GetTableName<TEntity>()}");
+                        sql.Append($"Select * From {_databaseName}.{Utilities.GetTableName<TEntity>()}");
 
 
                     bool first = true;
@@ -274,7 +278,7 @@ namespace MySql.DataLayer.Core.Repository
                 StringBuilder sql = new StringBuilder();
                 DynamicParameters parameters = new DynamicParameters();
 
-                sql.Append($"Select * From {Utilities.GetTableName<TEntity>()}");
+                sql.Append($"Select * From {_databaseName}.{Utilities.GetTableName<TEntity>()}");
 
                 string pkColumnName = Utilities.GetPkColumnName<TEntity>(false);
 
@@ -329,7 +333,7 @@ namespace MySql.DataLayer.Core.Repository
 
             string tableName = Utilities.GetTableName<TEntity>();
 
-            sql.Append($"Delete from {tableName} Where {pkColumnName} = @{Utilities.GetPkColumnName<TEntity>(false)}");
+            sql.Append($"Delete from {_databaseName}.{tableName} Where {pkColumnName} = @{Utilities.GetPkColumnName<TEntity>(false)}");
 
 
             DynamicParameters parameters = new DynamicParameters();
@@ -365,7 +369,6 @@ namespace MySql.DataLayer.Core.Repository
         /// <returns></returns>
         public virtual async Task<int> UpdateAsync(TEntity entity, MySqlConnection connection, MySqlTransaction transaction = null)
         {
-
             string pkColumnName = Utilities.GetPkColumnName<TEntity>(false);
 
             if (string.IsNullOrEmpty(pkColumnName))
@@ -403,7 +406,7 @@ namespace MySql.DataLayer.Core.Repository
                 }
             });
 
-            _sql.Append($"update {tableName} set ");
+            _sql.Append($"UPDATE {_databaseName}.{tableName} set ");
             bool first = true;
             foreach (var item in _parameters)
             {
@@ -426,6 +429,49 @@ namespace MySql.DataLayer.Core.Repository
             _parameters.ForEach(p => dapperParameters.Add(p.ParameterName, p.ParameterValue));
 
             return await connection.ExecuteAsync(_sql.ToString(), dapperParameters, transaction);
+        }
+        /// <summary>
+        /// Provides the execution of a StoredProcedure to get a list for mapped data
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="queryParameters"></param>
+        /// <returns></returns>
+        public virtual async Task<List<TResult>> ExecuteStoredProcedure<TResult>(QueryParameter[] queryParameters = null)
+            where TResult : IDataStoredProcedure
+        {
+            List<TResult> result = new List<TResult>();
+
+            using (var connection = await _connectionFactory.GetAsync())
+            {
+                StringBuilder sql = new StringBuilder();
+
+                sql.Append($"CALL {_databaseName}.{Utilities.GetStoredProcedureName<TResult>()}");
+
+
+                if (queryParameters != null)
+                {
+                    bool first = true;
+
+                    foreach (var c in queryParameters)
+                    {
+                        if (first)                        
+                           sql.Append($"('{c.ParameterValue}'");
+                        
+                        else                     
+                            sql.Append($",'{c.ParameterValue}'");
+                        
+                        first = false;
+                    }
+
+                    sql.Append($");");
+                }
+
+                result = await connection
+                                     .QueryAsync<TResult>
+                                     (sql.ToString()) as List<TResult>;
+
+                return result;
+            }
         }
     }
 }

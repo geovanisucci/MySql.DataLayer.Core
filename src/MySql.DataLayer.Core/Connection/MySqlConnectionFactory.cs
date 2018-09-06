@@ -9,13 +9,16 @@ namespace MySql.DataLayer.Core.Connection
     public class MySqlConnectionFactory : IMySqlConnectionFactory
     {
         private string _connectionString;
+        private string _databaseName;
+
         /// <summary>
         /// The constructor of the MySqlConnectionFactory.
         /// </summary>
         /// <param name="connectionString"></param>
-        public MySqlConnectionFactory(string connectionString)
+        public MySqlConnectionFactory(string connectionString, string databaseName = null)
         {
             _connectionString = connectionString;
+            _databaseName = databaseName;
         }
         /// <summary>
         /// Open connection asynchronous.
@@ -28,6 +31,16 @@ namespace MySql.DataLayer.Core.Connection
             await conn.OpenAsync();
 
             return conn;
+        }
+
+        public string GetDatabaseName()
+        {
+            string databaseNameResult = null;
+
+            if (_databaseName != null)
+                databaseNameResult = $"`{_databaseName}`";
+
+            return databaseNameResult;
         }
     }
 }
