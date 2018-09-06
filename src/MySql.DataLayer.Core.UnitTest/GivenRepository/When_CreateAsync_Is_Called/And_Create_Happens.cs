@@ -25,7 +25,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_CreateAsync_Is_Call
             {
                 Environment.SetEnvironmentVariable("MYSQL_HOST", "192.168.99.100");
             }
-            Database.Create(out _connectionFactory);
+            Database.Create(out _connectionFactory); 
             Database.CreateFooTable(_connectionFactory);
 
             _repository = new Repository(_connectionFactory);
