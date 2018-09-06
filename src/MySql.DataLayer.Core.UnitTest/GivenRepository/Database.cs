@@ -95,7 +95,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
 
         public static string GetConnectionString()
         {
-            return "DataBase=sys;Uid=root;Pwd=developer;Pooling=True;Allow User Variables=true";
+            return "Server=127.0.0.1;DataBase=sys;Uid=root;Pwd=developer;Pooling=True;Allow User Variables=true";
         }
         public static string GetDatabaseNameString()
         {
