@@ -8,6 +8,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
     {
         public Repository(IMySqlConnectionFactory connectionFactory) : base(connectionFactory)
         {
+            
         }
     }
 }
