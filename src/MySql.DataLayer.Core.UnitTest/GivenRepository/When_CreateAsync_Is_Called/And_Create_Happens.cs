@@ -32,7 +32,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_CreateAsync_Is_Call
         }
 
         [Test]
-        public async Task Should_Return_Success()
+        public void Should_Return_Success()
         {
             int result = 0;
 
@@ -41,7 +41,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_CreateAsync_Is_Call
             //Execute SQL Query
             using (var c = _connectionFactory.GetAsync().Result)
             {
-                result = await c.ExecuteScalarAsync<int>(sqlCommand.ToString());
+                result = c.ExecuteScalarAsync<int>(sqlCommand.ToString()).Result;
             }
 
             Assert.IsTrue(result == 1);

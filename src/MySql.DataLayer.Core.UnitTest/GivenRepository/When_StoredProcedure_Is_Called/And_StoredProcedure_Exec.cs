@@ -32,17 +32,17 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_StoredProcedure_Is_
         }
 
         [Test]
-        public async Task Should_Return_Success()
+        public void Should_Return_Success()
         {
             List<QueryParameter> queryParameters = new List<QueryParameter>();
             queryParameters.Add(new QueryParameter
             {
                 ParameterName = "limitToSelect",
-                ParameterValue = "50"
+                ParameterValue = 50
             });
 
             List<FooStoredProcedureWithParameter> resultList =
-                                            await _repository.ExecuteStoredProcedure<FooStoredProcedureWithParameter>(queryParameters.ToArray());
+                                           _repository.ExecuteStoredProcedure<FooStoredProcedureWithParameter>(queryParameters.ToArray()).Result;
 
             Assert.IsTrue(resultList != null);
         }

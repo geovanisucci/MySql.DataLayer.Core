@@ -11,11 +11,11 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
         public static void Create(out IMySqlConnectionFactory conn)
         {
 
-            conn = new MySqlConnectionFactory(GetConnectionString(), GetDatabaseNameString());
+            conn = new MySqlConnectionFactory(GetConnectionString(),GetDatabaseNameString());
 
             var sqlCreate = $"create database if not exists `mysqlcoretest`";
 
-            using (var c = conn.GetAsync().Result)
+            using (var c = conn.GetAsync("sys").Result)
             {
                 c.ExecuteAsync(sqlCreate).Wait();
             }
@@ -45,7 +45,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
             sqlCreate.Append(")");
 
             //Execute SQL Query
-            using (var c = conn.GetAsync().Result)
+            using (var c = conn.GetAsync(GetDatabaseNameString()).Result)
             {
                 c.ExecuteAsync(sqlCreate.ToString()).Wait();
             }
@@ -72,7 +72,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
             }
 
             //Execute SQL Query
-            using (var c = conn.GetAsync().Result)
+            using (var c = conn.GetAsync(GetDatabaseNameString()).Result)
             {
                 c.ExecuteAsync(sqlInsert.ToString()).Wait();
             }
@@ -88,7 +88,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
             sqlCreateStoredProcedure.AppendLine("END ");
 
             //Execute SQL Query
-            using (var c = conn.GetAsync().Result)
+            using (var c = conn.GetAsync(GetDatabaseNameString()).Result)
             {
                 c.ExecuteAsync(sqlCreateStoredProcedure.ToString()).Wait();
             }
@@ -97,7 +97,6 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
         public static string GetConnectionString()
         {
             return  $@"Server={Environment.GetEnvironmentVariable("MYSQL_HOST")};User=root;Password=developer;";
-           // return "Server=mysql;DataBase=sys;Uid=root;Pwd=developer;Pooling=True;Allow User Variables=true";
         }
         public static string GetDatabaseNameString()
         {

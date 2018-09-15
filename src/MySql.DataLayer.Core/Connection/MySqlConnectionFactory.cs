@@ -15,7 +15,7 @@ namespace MySql.DataLayer.Core.Connection
         /// The constructor of the MySqlConnectionFactory.
         /// </summary>
         /// <param name="connectionString"></param>
-        public MySqlConnectionFactory(string connectionString, string databaseName = null)
+        public MySqlConnectionFactory(string connectionString,string databaseName = null)
         {
             _connectionString = connectionString;
             _databaseName = databaseName;
@@ -24,23 +24,18 @@ namespace MySql.DataLayer.Core.Connection
         /// Open connection asynchronous.
         /// </summary>
         /// <returns>MySqlConnection completed.</returns>
-        public async Task<MySqlConnection> GetAsync()
+        public async Task<MySqlConnection> GetAsync(string databaseName = null)
         {
             MySqlConnection conn = new MySqlConnection(_connectionString);
 
             await conn.OpenAsync();
 
+            if (!string.IsNullOrEmpty(databaseName))
+                await conn.ChangeDataBaseAsync(databaseName);
+            else if (!string.IsNullOrEmpty(_databaseName))
+                await conn.ChangeDataBaseAsync(_databaseName);
+
             return conn;
-        }
-
-        public string GetDatabaseName()
-        {
-            string databaseNameResult = null;
-
-            if (_databaseName != null)
-                databaseNameResult = $"`{_databaseName}`";
-
-            return databaseNameResult;
         }
     }
 }

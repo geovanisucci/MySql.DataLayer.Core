@@ -11,12 +11,6 @@ namespace MySql.DataLayer.Core.Connection
         /// Open connection asynchronous.
         /// </summary>
         /// <returns>MySqlConnection completed.</returns>
-        Task<MySqlConnection> GetAsync();
-
-        /// <summary>
-        /// Get Database Name used in current connection
-        /// </summary>
-        /// <returns></returns>
-        string GetDatabaseName();
+        Task<MySqlConnection> GetAsync(string databaseName = null);
     }
 }
