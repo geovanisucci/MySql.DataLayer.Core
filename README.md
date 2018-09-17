@@ -16,4 +16,4 @@ Also, can map the Entity Data Model to Data Transfer Object (DTO) using Agile Ma
 ## Installation
 To install this library you will need to run the following Nuget Package command:
 
-  ```dotnet add package MySqlDataLayer.Core --version 1.0.0```
+  ```dotnet add package MySqlDataLayer.Core --version 1.1.0```
