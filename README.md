@@ -11,7 +11,7 @@ Also, can map the Entity Data Model to Data Transfer Object (DTO) using Agile Ma
 
 - [Installation](#installation)
 
---
+---
 
 ## Installation
 To install this library you will need to run the following Nuget Package command:
