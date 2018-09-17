@@ -11,6 +11,6 @@ namespace MySql.DataLayer.Core.Connection
         /// Open connection asynchronous.
         /// </summary>
         /// <returns>MySqlConnection completed.</returns>
-        Task<MySqlConnection> GetAsync();
+        Task<MySqlConnection> GetAsync(string databaseName = null);
     }
 }

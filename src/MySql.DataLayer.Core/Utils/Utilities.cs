@@ -6,6 +6,7 @@ namespace MySql.DataLayer.Core.Utils
     using System;
     using MySql.DataLayer.Core.Attributes.EntityConfig.Table;
     using MySql.DataLayer.Core.Attributes.StoredProcedureConfig.StoredProcedure;
+    using System.Data;
 
     public class Utilities
     {
@@ -13,6 +14,8 @@ namespace MySql.DataLayer.Core.Utils
         private static Dictionary<string, string> _pkColumnName = new Dictionary<string, string>();
         private static Dictionary<Type, string> _tableNames = new Dictionary<Type, string>();
         private static Dictionary<Type, string> _storedProcedureNames = new Dictionary<Type, string>();
+        private static Dictionary<Type, DbType> _typeMap;
+
         public static string ConditionToString(Condition condition)
         {
             switch (condition)
@@ -88,6 +91,7 @@ namespace MySql.DataLayer.Core.Utils
             Type type = typeof(T);
             return GetStoredProcedureName(type);
         }
+
         public static string GetTableName(Type type)
         {
             string name = null;
@@ -104,7 +108,7 @@ namespace MySql.DataLayer.Core.Utils
                 {
                     name = attribute.Name;
                 }
-                name = $"`{name}`";
+                //name = $"`{name}`";
                 _tableNames.Add(type, name);
             }
             return name;
@@ -125,6 +129,7 @@ namespace MySql.DataLayer.Core.Utils
                 {
                     name = attribute.Name;
                 }
+
                 name = $"`{name}`";
                 _storedProcedureNames.Add(type, name);
             }
@@ -197,5 +202,77 @@ namespace MySql.DataLayer.Core.Utils
         }
 
 
+        public static DbType PropertyToDatabaseType(object property, Type typeOfNullProperty = null)
+        {
+            if (_typeMap == null)
+                FillDatabaseTypeMapping();
+
+            DbType result;
+
+            Type propertyType;
+
+            //If the property has value get type of this property by reflection
+            if (property != null)
+                propertyType = property.GetType();
+            //If property value is null need to pass the type as a parameter because isn't possible to get by reflection
+            else if (property == null && typeOfNullProperty != null)
+            {
+                //If type isn't Nullable<T> transform in Nullable<T>
+                if (typeOfNullProperty.IsValueType)
+                    propertyType =  typeof(Nullable<>).MakeGenericType(typeOfNullProperty);
+                else
+                    propertyType = typeOfNullProperty;
+            }             
+            //If property and typeOfNullProperty is null it's impossible to define the type
+            else
+                throw new Exception("Can't define the type");
+
+            var hasValue = _typeMap.TryGetValue(propertyType, out result);
+
+            if (hasValue)
+                return result;
+            else
+                throw new Exception("Conversion error! DatabaseType Not found");
+        }
+
+        private static void FillDatabaseTypeMapping()
+        {
+            _typeMap = new Dictionary<Type, DbType>();
+
+            _typeMap.Add(typeof(byte), DbType.Byte);
+            _typeMap.Add(typeof(sbyte), DbType.SByte);
+            _typeMap.Add(typeof(short), DbType.Int16);
+            _typeMap.Add(typeof(ushort), DbType.UInt16);
+            _typeMap.Add(typeof(int), DbType.Int32);
+            _typeMap.Add(typeof(uint), DbType.UInt32);
+            _typeMap.Add(typeof(long), DbType.Int64);
+            _typeMap.Add(typeof(ulong), DbType.UInt64);
+            _typeMap.Add(typeof(float), DbType.Single);
+            _typeMap.Add(typeof(double), DbType.Double);
+            _typeMap.Add(typeof(decimal), DbType.Decimal);
+            _typeMap.Add(typeof(bool), DbType.Boolean);
+            _typeMap.Add(typeof(string), DbType.String);
+            _typeMap.Add(typeof(char), DbType.StringFixedLength);
+            _typeMap.Add(typeof(Guid), DbType.Guid);
+            _typeMap.Add(typeof(DateTime), DbType.DateTime);
+            _typeMap.Add(typeof(DateTimeOffset), DbType.DateTimeOffset);
+            _typeMap.Add(typeof(byte[]), DbType.Binary);
+            _typeMap.Add(typeof(byte?), DbType.Byte);
+            _typeMap.Add(typeof(sbyte?), DbType.SByte);
+            _typeMap.Add(typeof(short?), DbType.Int16);
+            _typeMap.Add(typeof(ushort?), DbType.UInt16);
+            _typeMap.Add(typeof(int?), DbType.Int32);
+            _typeMap.Add(typeof(uint?), DbType.UInt32);
+            _typeMap.Add(typeof(long?), DbType.Int64);
+            _typeMap.Add(typeof(ulong?), DbType.UInt64);
+            _typeMap.Add(typeof(float?), DbType.Single);
+            _typeMap.Add(typeof(double?), DbType.Double);
+            _typeMap.Add(typeof(decimal?), DbType.Decimal);
+            _typeMap.Add(typeof(bool?), DbType.Boolean);
+            _typeMap.Add(typeof(char?), DbType.StringFixedLength);
+            _typeMap.Add(typeof(Guid?), DbType.Guid);
+            _typeMap.Add(typeof(DateTime?), DbType.DateTime);
+            _typeMap.Add(typeof(DateTimeOffset?), DbType.DateTimeOffset);
+        }
     }
 }

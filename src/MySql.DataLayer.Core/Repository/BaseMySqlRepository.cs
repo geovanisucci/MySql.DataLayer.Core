@@ -30,6 +30,7 @@ namespace MySql.DataLayer.Core.Repository
         {
             _connectionFactory = connectionFactory;
         }
+
         /// <summary>
         /// Provides the insert statement.
         /// </summary>
@@ -365,7 +366,6 @@ namespace MySql.DataLayer.Core.Repository
         /// <returns></returns>
         public virtual async Task<int> UpdateAsync(TEntity entity, MySqlConnection connection, MySqlTransaction transaction = null)
         {
-
             string pkColumnName = Utilities.GetPkColumnName<TEntity>(false);
 
             if (string.IsNullOrEmpty(pkColumnName))
@@ -403,7 +403,7 @@ namespace MySql.DataLayer.Core.Repository
                 }
             });
 
-            _sql.Append($"update {tableName} set ");
+            _sql.Append($"UPDATE {tableName} set ");
             bool first = true;
             foreach (var item in _parameters)
             {
@@ -426,6 +426,57 @@ namespace MySql.DataLayer.Core.Repository
             _parameters.ForEach(p => dapperParameters.Add(p.ParameterName, p.ParameterValue));
 
             return await connection.ExecuteAsync(_sql.ToString(), dapperParameters, transaction);
+        }
+        /// <summary>
+        /// Provides the execution of a StoredProcedure to get a list for mapped data
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="queryParameters"></param>
+        /// <returns></returns>
+        public virtual async Task<List<TResult>> ExecuteStoredProcedure<TResult>(QueryParameter[] queryParameters = null)
+            where TResult : IDataStoredProcedure
+        {
+            List<TResult> result = new List<TResult>();
+
+            using (var connection = await _connectionFactory.GetAsync())
+            {
+                result = await ExecuteStoredProcedure<TResult>(connection, queryParameters);
+            }
+
+            return result;
+        }
+        /// <summary>
+        /// Provides the execution of a StoredProcedure to get a list for mapped data, with option to pass the transaction
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="queryParameters"></param>
+        /// <returns></returns>
+        public virtual async Task<List<TResult>> ExecuteStoredProcedure<TResult>(MySqlConnection connection, QueryParameter[] queryParameters = null, MySqlTransaction transaction = null)
+            where TResult : IDataStoredProcedure
+        {
+            List<TResult> result = new List<TResult>();
+
+            StringBuilder sql = new StringBuilder();
+
+            sql.Append(Utilities.GetStoredProcedureName<TResult>());
+
+            DynamicParameters parameters = new DynamicParameters();
+
+            if (queryParameters != null)
+            {
+                foreach (var c in queryParameters)
+                {
+                    var dbType = Utilities.PropertyToDatabaseType(c.ParameterValue);
+
+                    parameters.Add(c.ParameterName, c.ParameterValue, dbType);
+                }
+            }
+
+            result = await connection
+                                 .QueryAsync<TResult>
+                                 (sql.ToString(), parameters, transaction, null, CommandType.StoredProcedure) as List<TResult>;
+
+            return result;
         }
     }
 }

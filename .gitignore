@@ -1,3 +1,4 @@
 obj
 bin
 **/lcov.info
+/src/.vs/MySql.DataLayer.Core/v15/Server/sqlite3
