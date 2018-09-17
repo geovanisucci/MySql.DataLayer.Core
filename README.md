@@ -5,3 +5,6 @@ Data Layer that provides a basic CRUD operations using Dapper with .Net Core
 
 Welcome to `MySql.DataLayer.Core`
 
+This library provides the database access layer to MySql using Dapper and .Net Core.
+Also, it provides the base repository with basic CRUD operations, calls Stored Procedures and Views. Provides the configuration to Data Model, mapping the entities to your database.
+Also, can map the Entity Data Model to Data Transfer Object (DTO) using Agile Mapper.
