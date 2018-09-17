@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <PackageId>MySqlDataLayer.Core</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Geovani Sajorato</Authors>
+    <Company>Sajorato Labs</Company>
   </PropertyGroup>
 
   <ItemGroup>
