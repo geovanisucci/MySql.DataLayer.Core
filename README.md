@@ -46,14 +46,17 @@ using (MySqlConnection connection = await connectionFactory.GetAsync())
  using Dapper;
  public class Foo
  {
-    using (MySqlConnection connection = await connectionFactory.GetAsync())
+    public async void MyMethod()
     {
-        //Use the connection and Dapper method here...
-        
-        connection.Query("your sql query here"); // for example
-        
-        //like this, you have all Dapper methods in connection object here.
-    }  
+         using (MySqlConnection connection = await connectionFactory.GetAsync())
+         {
+             //Use the connection and Dapper method here...
+
+             connection.Query("your sql query here"); // for example
+
+             //like this, you have all Dapper methods in connection object here.
+         }
+    }
  }
  ```
  
