@@ -14,7 +14,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_Utilities_Is_Called
         {
             string s = "string";
 
-            DbType result = Utilities.PropertyToDatabaseType(s);
+            DbType? result = Utilities.PropertyToDatabaseType(s);
 
             Assert.IsTrue(result == DbType.String);
         }
@@ -24,7 +24,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_Utilities_Is_Called
         {
             int i = 1;
 
-            DbType result = Utilities.PropertyToDatabaseType(i);
+            DbType? result = Utilities.PropertyToDatabaseType(i);
 
             Assert.IsTrue(result == DbType.Int32);
         }
@@ -34,7 +34,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_Utilities_Is_Called
         {
             decimal d = 1000.0M;
 
-            DbType result = Utilities.PropertyToDatabaseType(d);
+            DbType? result = Utilities.PropertyToDatabaseType(d);
 
             Assert.IsTrue(result == DbType.Decimal);
         }
@@ -45,7 +45,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_Utilities_Is_Called
         {
             DateTime dt = DateTime.Now;
 
-            DbType result = Utilities.PropertyToDatabaseType(dt);
+            DbType? result = Utilities.PropertyToDatabaseType(dt);
 
             Assert.IsTrue(result == DbType.DateTime);
         }
@@ -55,50 +55,50 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_Utilities_Is_Called
         {
             Guid g = Guid.NewGuid();
 
-            DbType result = Utilities.PropertyToDatabaseType(g);
+            DbType? result = Utilities.PropertyToDatabaseType(g);
 
             Assert.IsTrue(result == DbType.Guid);
         }
 
         [Test]
-        public void Should_Return_IsTrue_Null_DbTypeInt32()
+        public void Should_Return_IsNull_DbTypeInt32()
         {
             int? i = null;
             
-            DbType result = Utilities.PropertyToDatabaseType(i,typeof(int));
+            DbType? result = Utilities.PropertyToDatabaseType(i);
 
-            Assert.IsTrue(result == DbType.Int32);
+            Assert.IsNull(result);
         }
 
         [Test]
-        public void Should_Return_IsTrue_Null_DbTypeDecimal()
+        public void Should_Return_IsNull_DbTypeDecimal()
         {
             decimal? d = null;
 
-            DbType result = Utilities.PropertyToDatabaseType(d, typeof(decimal));
+            DbType? result = Utilities.PropertyToDatabaseType(d);
 
-            Assert.IsTrue(result == DbType.Decimal);
+            Assert.IsNull(result);
         }
 
 
         [Test]
-        public void Should_Return_IsTrue_Null_DbTypeDatetime()
+        public void Should_Return_IsNull_DbTypeDatetime()
         {
             DateTime? dt = null;
 
-            DbType result = Utilities.PropertyToDatabaseType(dt, typeof(DateTime));
+            DbType? result = Utilities.PropertyToDatabaseType(dt);
 
-            Assert.IsTrue(result == DbType.DateTime);
+            Assert.IsNull(result);
         }
 
         [Test]
-        public void Should_Return_IsTrue_Null_DbTypeGuid()
+        public void Should_Return_IsNull_DbTypeGuid()
         {
             Guid? g = null;
 
-            DbType result = Utilities.PropertyToDatabaseType(g, typeof(Guid));
+            DbType? result = Utilities.PropertyToDatabaseType(g);
 
-            Assert.IsTrue(result == DbType.Guid);
+            Assert.IsNull(result);
         }
     }
 }

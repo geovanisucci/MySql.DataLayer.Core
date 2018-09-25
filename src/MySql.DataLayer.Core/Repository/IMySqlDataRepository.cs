@@ -12,7 +12,7 @@ namespace MySql.DataLayer.Core.Repository
     /// <typeparam name="TEntity"></typeparam>
     public interface IMySqlDataRepository<TEntity>
         where TEntity : IDataEntity
-    {
+    { 
         /// <summary>
         /// Provides the Select operation to get a list for unmapped data.
         /// </summary>
@@ -78,22 +78,63 @@ namespace MySql.DataLayer.Core.Repository
         /// <param name="transaction"></param>
         /// <returns></returns>
         Task<int> RemoveAsync(object id, MySqlConnection connection, MySqlTransaction transaction = null);
-
+           
         /// <summary>
         /// Provides the execution of a StoredProcedure to get a list for mapped data
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="queryParameters"></param>
         /// <returns></returns>
-        Task<List<TResult>> ExecuteStoredProcedure<TResult>(QueryParameter[] queryParameters = null)
+        Task<List<TResult>> ExecuteStoredProcedureAsync<TResult>(QueryParameter[] queryParameters = null)
                     where TResult : IDataStoredProcedure;
         /// <summary>
         /// Provides the execution of a StoredProcedure to get a list for mapped data, with option to pass the transaction
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="queryParameters"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
         /// <returns></returns>
-        Task<List<TResult>> ExecuteStoredProcedure<TResult>(MySqlConnection connection, QueryParameter[] queryParameters = null, MySqlTransaction transaction = null)
+        Task<List<TResult>> ExecuteStoredProcedureAsync<TResult>(QueryParameter[] queryParameters, MySqlConnection connection, MySqlTransaction transaction = null)
                     where TResult : IDataStoredProcedure;
+        /// <summary>
+        /// Provides the execution of a StoredProcedure to get the count of affected rows
+        /// </summary>
+        /// <typeparam name="TStoredProcedure"></typeparam>
+        /// <param name="queryParameters"></param>
+        /// <returns></returns>
+        Task<int> ExecuteStoredProcedureReturnAffectedRowsAsync<TStoredProcedure>(QueryParameter[] queryParameters = null)
+                            where TStoredProcedure : IDataStoredProcedure;
+        /// <summary>
+        /// Provides the execution of a StoredProcedure to get the count of affected rows, with option to pass the transaction
+        /// </summary>
+        /// <typeparam name="TStoredProcedure"></typeparam>
+        /// <param name="queryParameters"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        Task<int> ExecuteStoredProcedureReturnAffectedRowsAsync<TStoredProcedure>(QueryParameter[] queryParameters, MySqlConnection connection, MySqlTransaction transaction = null)
+                                where TStoredProcedure : IDataStoredProcedure;
+
+        /// <summary>
+        ///  Provides the execution of a View to get a list for mapped data
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="columns"></param>
+        /// <param name="conditionsSearch"></param>
+        /// <returns></returns>
+        Task<List<TResult>> ExecuteViewAsync<TResult>(ColumnTable[] columns = null, ConditionSearch[] conditionsSearch = null)
+            where TResult : IDataView;
+        /// <summary>
+        /// Provides the execution of a View to get a list for mapped data, with option to pass the transaction
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="columns"></param>
+        /// <param name="conditionsSearch"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        Task<List<TResult>> ExecuteViewAsync<TResult>(ColumnTable[] columns, ConditionSearch[] conditionsSearch, MySqlConnection connection, MySqlTransaction transaction = null)
+            where TResult : IDataView;
     }
 }

@@ -93,6 +93,52 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
                 c.ExecuteAsync(sqlCreateStoredProcedure.ToString()).Wait();
             }
         }
+        public static void CreateFooStoredProcedureWithoutParameter(IMySqlConnectionFactory conn)
+        {
+            StringBuilder sqlCreateStoredProcedure = new StringBuilder();
+
+            sqlCreateStoredProcedure.AppendLine("CREATE PROCEDURE `mysqlcoretest`.FooStoredProcedureWithoutParameter() ");
+            sqlCreateStoredProcedure.AppendLine("BEGIN ");
+            sqlCreateStoredProcedure.AppendLine("SELECT `id`,`Description` FROM `mysqlcoretest`.`foo`; ");
+            sqlCreateStoredProcedure.AppendLine("END ");
+
+            //Execute SQL Query
+            using (var c = conn.GetAsync(GetDatabaseNameString()).Result)
+            {
+                c.ExecuteAsync(sqlCreateStoredProcedure.ToString()).Wait();
+            }
+        }
+        public static void CreateFooStoredProcedureWithNullParameter(IMySqlConnectionFactory conn)
+        {
+            StringBuilder sqlCreateStoredProcedure = new StringBuilder();
+
+            sqlCreateStoredProcedure.AppendLine("CREATE PROCEDURE `mysqlcoretest`.FooStoredProcedureWithNullParameter (IN idValue CHAR(36), IN descriptionValue VARCHAR(200)) ");
+            sqlCreateStoredProcedure.AppendLine("BEGIN ");
+            sqlCreateStoredProcedure.AppendLine("INSERT INTO `mysqlcoretest`.`foo` (`id`,`Description`) VALUEs(idValue,descriptionValue); ");
+            sqlCreateStoredProcedure.AppendLine("END ");
+
+            //Execute SQL Query
+            using (var c = conn.GetAsync(GetDatabaseNameString()).Result)
+            {
+                c.ExecuteAsync(sqlCreateStoredProcedure.ToString()).Wait();
+            }
+        }
+
+
+        public static void CreateFooView(IMySqlConnectionFactory conn)
+        {
+            StringBuilder sqlCreateView = new StringBuilder();
+
+            sqlCreateView.AppendLine("CREATE VIEW `mysqlcoretest`.FooView ");
+            sqlCreateView.AppendLine("AS ");
+            sqlCreateView.AppendLine("SELECT `id`,`Description`,CONCAT('Foo --> ',Description) as Concat FROM `mysqlcoretest`.`foo`");
+
+            //Execute SQL Query
+            using (var c = conn.GetAsync(GetDatabaseNameString()).Result)
+            {
+                c.ExecuteAsync(sqlCreateView.ToString()).Wait();
+            }
+        }
 
         public static string GetConnectionString()
         {
