@@ -40,6 +40,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
             sqlCreate.Append("(");
             sqlCreate.Append("`id` CHAR(36) NOT NULL ,");
             sqlCreate.Append("`Description` VARCHAR(100) NULL,");
+            sqlCreate.Append("`CreatedAt` DateTime NULL,");
             sqlCreate.Append(" PRIMARY KEY (`id`),");
             sqlCreate.Append("UNIQUE INDEX `ID_UNIQUE` (`id` ASC)");
             sqlCreate.Append(")");

@@ -45,6 +45,17 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_CreateAsync_Is_Call
             }
 
             Assert.IsTrue(result == 1);
+
+            FooEntity f = new FooEntity()
+            {
+                id = Guid.NewGuid(),
+                Description = "Test",
+                CreatedAt = null
+            };
+
+            var rows = _repository.CreateAsync(f).Result;
+
+            Assert.IsTrue(rows == 1);
         }
 
         [TearDown]

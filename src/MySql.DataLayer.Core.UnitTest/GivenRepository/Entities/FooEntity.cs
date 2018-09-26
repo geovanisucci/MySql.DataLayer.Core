@@ -10,5 +10,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.Entities
         public Guid id { get; set; }
         [ColumnName("Description")]
         public string Description { get; set; }
+
+        public DateTime? CreatedAt { get; set; }
     }
 }

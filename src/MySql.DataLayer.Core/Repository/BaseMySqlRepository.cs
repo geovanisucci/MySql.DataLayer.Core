@@ -77,7 +77,7 @@ namespace MySql.DataLayer.Core.Repository
 
                         var itemValue = prop.GetValue(entity);
                         if (prop.GetValue(entity) == null)
-                            itemValue = DBNull.Value;
+                            itemValue = null;
 
                         _parameters.Add(new QueryParameter { ParameterName = $"@{paramName}", ParameterValue = itemValue });
                     }
@@ -89,7 +89,7 @@ namespace MySql.DataLayer.Core.Repository
 
                     var itemValue = prop.GetValue(entity);
                     if (prop.GetValue(entity) == null)
-                        itemValue = DBNull.Value;
+                        itemValue = null;
 
                     _parameters.Add(new QueryParameter { ParameterName = $"@{paramName}", ParameterValue = itemValue });
                 }
@@ -393,7 +393,7 @@ namespace MySql.DataLayer.Core.Repository
 
                     var itemValue = prop.GetValue(entity);
                     if (prop.GetValue(entity) == null)
-                        itemValue = DBNull.Value;
+                        itemValue = null;
 
                     _parameters.Add(new QueryParameter { ParameterName = $"@{paramName}", ParameterValue = itemValue });
                 }
