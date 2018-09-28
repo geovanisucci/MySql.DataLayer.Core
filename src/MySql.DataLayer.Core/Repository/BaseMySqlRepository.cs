@@ -30,7 +30,6 @@ namespace MySql.DataLayer.Core.Repository
         {
             _connectionFactory = connectionFactory;
         }
-
         /// <summary>
         /// Provides the insert statement.
         /// </summary>
@@ -109,67 +108,24 @@ namespace MySql.DataLayer.Core.Repository
         /// <returns></returns>
         public virtual async Task<List<TEntity>> GetAllAsync(ConditionSearch[] conditionsSearch = null)
         {
-            List<TEntity> result = new List<TEntity>();
             using (var connection = await _connectionFactory.GetAsync())
             {
+                List<TEntity> result = new List<TEntity>();
 
                 StringBuilder sql = new StringBuilder();
 
-                if (conditionsSearch == null)
-                {
+                string tableName = Utilities.GetTableName<TEntity>();
 
-                    sql.Append($"Select * From {Utilities.GetTableName<TEntity>()}");
+                (DynamicParameters parameters, string conditionsQuery) = Utilities.GetConditionsToSearch(conditionsSearch);
 
+                sql.Append($"SELECT * FROM {tableName} {conditionsQuery}");
 
-                    result = await connection
-                                        .QueryAsync<TEntity>
-                                        (sql.ToString()) as List<TEntity>;
+                result = await connection
+                            .QueryAsync<TEntity>
+                            (sql.ToString(), parameters) as List<TEntity>;
 
-                    return result;
-                }
-                else
-                {
-                    if (!conditionsSearch.Any())
-                        throw new Exception("The condition search parameter it not filled.");
-
-                    DynamicParameters parameters = new DynamicParameters();
-
-                    sql.Append($"Select * From {Utilities.GetTableName<TEntity>()}");
-
-
-                    bool first = true;
-
-                    foreach (var c in conditionsSearch)
-                    {
-                        if (first)
-                        {
-                            if (c.Condition != Condition.Where)
-                            {
-                                throw new Exception("The first condition needs to be Where.");
-                            }
-                        }
-                        else
-                        {
-                            if (c.Condition == Condition.Where)
-                            {
-                                throw new Exception("The condition needs to be And/Or.");
-                            }
-                        }
-
-                        sql.Append($"{Utilities.ConditionToString(c.Condition)} {c.ParameterName}{Utilities.OperatorToString(c.Operator)}@{c.ParameterName}");
-
-                        parameters.Add(c.ParameterName, c.ParameterValue);
-
-                        first = false;
-                    }
-
-                    result = await connection
-                                .QueryAsync<TEntity>
-                                (sql.ToString(), parameters) as List<TEntity>;
-                }
+                return result;
             }
-
-            return result;
         }
         /// <summary>
         ///   Provides the Select operation to get a list for unmapped data.
@@ -181,86 +137,26 @@ namespace MySql.DataLayer.Core.Repository
         public virtual async Task<List<TResult>> GetAllAsync<TResult>(ColumnTable[] columns, ConditionSearch[] conditionsSearch = null)
             where TResult : class
         {
-            List<TResult> result = new List<TResult>();
             using (var connection = await _connectionFactory.GetAsync())
             {
+                List<TResult> result = new List<TResult>();
+
                 StringBuilder sql = new StringBuilder();
 
-                if (conditionsSearch == null)
-                {
-                    if (columns != null)
-                    {
+                string columnsToSearch = Utilities.GetColumnsToSearch(columns);
 
-                        if (columns.Count() > 0)
-                        {
-                            sql.Append($"Select {String.Join<ColumnTable>(",", columns)} From {Utilities.GetTableName<TEntity>()}");
-                        }
+                string tableName = Utilities.GetTableName<TEntity>();
 
-                        else
-                            throw new Exception("The columns parameter it not filled.");
-                    }
-                    else
-                        sql.Append($"Select * From {Utilities.GetTableName<TEntity>()}");
+                (DynamicParameters parameters, string conditionsQuery) = Utilities.GetConditionsToSearch(conditionsSearch);
 
-                    var s = sql.ToString();
+                sql.Append($"SELECT {columnsToSearch} FROM {tableName} {conditionsQuery}");
 
-                    result = await connection
-                                        .QueryAsync<TResult>
-                                        (sql.ToString()) as List<TResult>;
+                result = await connection
+                            .QueryAsync<TResult>
+                            (sql.ToString(), parameters) as List<TResult>;
 
-                    return result;
-                }
-                else
-                {
-                    if (!conditionsSearch.Any())
-                        throw new Exception("The condition search parameter it not filled.");
-
-                    DynamicParameters parameters = new DynamicParameters();
-
-                    if (columns != null)
-                    {
-                        if (columns.Count() > 0)
-                            sql.Append($"Select {string.Join<ColumnTable>(",", columns)} From {Utilities.GetTableName<TEntity>()}");
-                        else
-                            throw new Exception("The columns parameter it not filled.");
-                    }
-                    else
-                        sql.Append($"Select * From {Utilities.GetTableName<TEntity>()}");
-
-
-                    bool first = true;
-
-                    foreach (var c in conditionsSearch)
-                    {
-                        if (first)
-                        {
-                            if (c.Condition != Condition.Where)
-                            {
-                                throw new Exception("The first condition needs to be Where.");
-                            }
-                        }
-                        else
-                        {
-                            if (c.Condition == Condition.Where)
-                            {
-                                throw new Exception("The condition needs to be And/Or.");
-                            }
-                        }
-
-                        sql.Append($"{Utilities.ConditionToString(c.Condition)} {c.ParameterName} {Utilities.OperatorToString(c.Operator)} @{c.ParameterName}");
-
-                        parameters.Add(c.ParameterName, c.ParameterValue);
-
-                        first = false;
-                    }
-
-                    result = await connection
-                                .QueryAsync<TResult>
-                                (sql.ToString(), parameters) as List<TResult>;
-                }
+                return result;
             }
-
-            return result;
         }
         /// <summary>
         /// Provides the Select operation to geta single mapped data.
@@ -427,20 +323,21 @@ namespace MySql.DataLayer.Core.Repository
 
             return await connection.ExecuteAsync(_sql.ToString(), dapperParameters, transaction);
         }
+
         /// <summary>
         /// Provides the execution of a StoredProcedure to get a list for mapped data
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="queryParameters"></param>
         /// <returns></returns>
-        public virtual async Task<List<TResult>> ExecuteStoredProcedure<TResult>(QueryParameter[] queryParameters = null)
+        public virtual async Task<List<TResult>> ExecuteStoredProcedureAsync<TResult>(QueryParameter[] queryParameters = null)
             where TResult : IDataStoredProcedure
         {
             List<TResult> result = new List<TResult>();
 
             using (var connection = await _connectionFactory.GetAsync())
             {
-                result = await ExecuteStoredProcedure<TResult>(connection, queryParameters);
+                result = await ExecuteStoredProcedureAsync<TResult>(queryParameters, connection);
             }
 
             return result;
@@ -450,8 +347,10 @@ namespace MySql.DataLayer.Core.Repository
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="queryParameters"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
         /// <returns></returns>
-        public virtual async Task<List<TResult>> ExecuteStoredProcedure<TResult>(MySqlConnection connection, QueryParameter[] queryParameters = null, MySqlTransaction transaction = null)
+        public virtual async Task<List<TResult>> ExecuteStoredProcedureAsync<TResult>(QueryParameter[] queryParameters, MySqlConnection connection, MySqlTransaction transaction = null)
             where TResult : IDataStoredProcedure
         {
             List<TResult> result = new List<TResult>();
@@ -466,15 +365,124 @@ namespace MySql.DataLayer.Core.Repository
             {
                 foreach (var c in queryParameters)
                 {
-                    var dbType = Utilities.PropertyToDatabaseType(c.ParameterValue);
+                    if (c.ParameterValue != null)
+                    {
+                        var dbType = Utilities.PropertyToDatabaseType(c.ParameterValue);
 
-                    parameters.Add(c.ParameterName, c.ParameterValue, dbType);
+                        parameters.Add(c.ParameterName, c.ParameterValue, dbType);
+                    }
+                    else
+                        parameters.Add(c.ParameterName);
                 }
             }
 
             result = await connection
                                  .QueryAsync<TResult>
                                  (sql.ToString(), parameters, transaction, null, CommandType.StoredProcedure) as List<TResult>;
+
+            return result;
+        }
+        /// <summary>
+        /// Provides the execution of a StoredProcedure to get the count of affected rows
+        /// </summary>
+        /// <typeparam name="TStoredProcedure"></typeparam>
+        /// <param name="queryParameters"></param>
+        /// <returns></returns>
+        public virtual async Task<int> ExecuteStoredProcedureReturnAffectedRowsAsync<TResult>(QueryParameter[] queryParameters = null)
+            where TResult : IDataStoredProcedure
+        {
+            int result = 0;
+
+            using (var connection = await _connectionFactory.GetAsync())
+            {
+                result = await ExecuteStoredProcedureReturnAffectedRowsAsync<TResult>(queryParameters, connection);
+            }
+
+            return result;
+        }
+        /// <summary>
+        /// Provides the execution of a StoredProcedure to get the count of affected rows, with option to pass the transaction
+        /// </summary>
+        /// <typeparam name="TStoredProcedure"></typeparam>
+        /// <param name="queryParameters"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        public virtual async Task<int> ExecuteStoredProcedureReturnAffectedRowsAsync<TResult>(QueryParameter[] queryParameters, MySqlConnection connection, MySqlTransaction transaction = null)
+           where TResult : IDataStoredProcedure
+        {
+            StringBuilder sql = new StringBuilder();
+
+            sql.Append(Utilities.GetStoredProcedureName<TResult>());
+
+            DynamicParameters parameters = new DynamicParameters();
+
+            if (queryParameters != null)
+            {
+                foreach (var c in queryParameters)
+                {
+                    if (c.ParameterValue != null)
+                    {
+                        var dbType = Utilities.PropertyToDatabaseType(c.ParameterValue);
+
+                        parameters.Add(c.ParameterName, c.ParameterValue, dbType);
+                    }
+                    else
+                        parameters.Add(c.ParameterName);
+                }
+            }
+
+            return await connection
+                                 .ExecuteAsync
+                                 (sql.ToString(), parameters, transaction, null, CommandType.StoredProcedure);             
+        }
+
+        /// <summary>
+        ///  Provides the execution of a View to get a list for mapped data
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="columns"></param>
+        /// <param name="conditionsSearch"></param>
+        /// <returns></returns>
+        public virtual async Task<List<TResult>> ExecuteViewAsync<TResult>(ColumnTable[] columns = null, ConditionSearch[] conditionsSearch = null)
+            where TResult : IDataView
+        {
+            List<TResult> result = new List<TResult>();
+
+            using (var connection = await _connectionFactory.GetAsync())
+            {
+                result = await ExecuteViewAsync<TResult>(columns, conditionsSearch, connection);
+            }
+
+            return result;
+        }
+        /// <summary>
+        /// Provides the execution of a View to get a list for mapped data, with option to pass the transaction
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="columns"></param>
+        /// <param name="conditionsSearch"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        public virtual async Task<List<TResult>> ExecuteViewAsync<TResult>(ColumnTable[] columns, ConditionSearch[] conditionsSearch, MySqlConnection connection, MySqlTransaction transaction = null)
+            where TResult : IDataView
+        {
+            List<TResult> result = new List<TResult>();
+
+            StringBuilder sql = new StringBuilder();
+
+            string columnsToSearch = Utilities.GetColumnsToSearch(columns);
+
+            string viewName = Utilities.GetViewName<TResult>();
+
+            (DynamicParameters parameters, string conditionsQuery) = Utilities.GetConditionsToSearch(conditionsSearch);
+
+            sql.Append($"SELECT {columnsToSearch} FROM {viewName} {conditionsQuery}");
+
+            result = await connection
+                        .QueryAsync<TResult>
+                        (sql.ToString(), parameters) as List<TResult>;
 
             return result;
         }
