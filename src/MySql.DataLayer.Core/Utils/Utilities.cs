@@ -7,6 +7,9 @@ namespace MySql.DataLayer.Core.Utils
     using MySql.DataLayer.Core.Attributes.EntityConfig.Table;
     using MySql.DataLayer.Core.Attributes.StoredProcedureConfig.StoredProcedure;
     using System.Data;
+    using MySql.DataLayer.Core.Attributes.ViewConfig.View;
+    using Dapper;
+    using System.Text;
 
     public class Utilities
     {
@@ -14,6 +17,7 @@ namespace MySql.DataLayer.Core.Utils
         private static Dictionary<string, string> _pkColumnName = new Dictionary<string, string>();
         private static Dictionary<Type, string> _tableNames = new Dictionary<Type, string>();
         private static Dictionary<Type, string> _storedProcedureNames = new Dictionary<Type, string>();
+        private static Dictionary<Type, string> _viewNames = new Dictionary<Type, string>();
         private static Dictionary<Type, DbType> _typeMap;
 
         public static string ConditionToString(Condition condition)
@@ -80,18 +84,12 @@ namespace MySql.DataLayer.Core.Utils
             Type tableType = typeof(T);
             return GetColumnName(tableType, property);
         }
+
         public static string GetTableName<T>() where T : IDataEntity
         {
             Type type = typeof(T);
             return GetTableName(type);
         }
-
-        public static string GetStoredProcedureName<T>() where T : IDataStoredProcedure
-        {
-            Type type = typeof(T);
-            return GetStoredProcedureName(type);
-        }
-
         public static string GetTableName(Type type)
         {
             string name = null;
@@ -114,6 +112,11 @@ namespace MySql.DataLayer.Core.Utils
             return name;
         }
 
+        public static string GetStoredProcedureName<T>() where T : IDataStoredProcedure
+        {
+            Type type = typeof(T);
+            return GetStoredProcedureName(type);
+        }
         public static string GetStoredProcedureName(Type type)
         {
             string name = null;
@@ -132,6 +135,33 @@ namespace MySql.DataLayer.Core.Utils
 
                 name = $"`{name}`";
                 _storedProcedureNames.Add(type, name);
+            }
+            return name;
+        }
+
+        public static string GetViewName<T>() where T : IDataView
+        {
+            Type type = typeof(T);
+            return GetViewName(type);
+        }
+        public static string GetViewName(Type type)
+        {
+            string name = null;
+            _viewNames.TryGetValue(type, out name);
+            if (name == null)
+            {
+                var attribute = type.GetCustomAttribute<ViewNameAttribute>();
+                if (attribute == null)
+                {
+                    name = type.Name;
+                }
+                else
+                {
+                    name = attribute.Name;
+                }
+
+                name = $"`{name}`";
+                _viewNames.Add(type, name);
             }
             return name;
         }
@@ -162,7 +192,6 @@ namespace MySql.DataLayer.Core.Utils
             }
             return name;
         }
-
         public static string GetPkColumnName<T>(bool sqlFormat = true) where T : IDataEntity
         {
             string pkName = "";
@@ -175,6 +204,64 @@ namespace MySql.DataLayer.Core.Utils
                     break;
             }
             return pkName;
+        }
+
+        public static string GetColumnsToSearch(ColumnTable[] columns)
+        {
+            string result = "*";
+
+            if (columns == null)
+                return result;
+            else if (columns.Count() == 0)
+                return result;
+            else
+            {
+                result = String.Join<ColumnTable>(",", columns);
+
+                return result;
+            }
+        }
+
+        public static (DynamicParameters parameters, string conditionsQuery) GetConditionsToSearch(ConditionSearch[] conditionsSearch)
+        {
+            //If the conditions is null return null parameter and condition query
+            if (conditionsSearch == null)            
+                return (null, null);
+            //If doesn't have any condition in array return null parameter and condition query
+            else if (!conditionsSearch.Any())            
+                return (null, null);  
+            //If the array has any value return the parameters filled and the conditions query
+            else
+            {
+                bool first = true;
+
+                DynamicParameters parameters = new DynamicParameters();
+
+                StringBuilder conditionsQuery = new StringBuilder();
+
+                foreach (var c in conditionsSearch)
+                {
+                    if (first)
+                    {
+                        if (c.Condition != Condition.Where)
+                            throw new Exception("The first condition needs to be Where.");
+
+                        first = false;
+                    }
+                    else
+                    {
+                        if (c.Condition == Condition.Where)
+                            throw new Exception("The condition needs to be And/Or.");
+
+                    }
+
+                    conditionsQuery.Append($"{ConditionToString(c.Condition)} {c.ParameterName} {OperatorToString(c.Operator)} @{c.ParameterName}");
+
+                    parameters.Add(c.ParameterName, c.ParameterValue);
+                }
+
+                return (parameters, conditionsQuery.ToString());
+            }
         }
 
 
@@ -202,7 +289,7 @@ namespace MySql.DataLayer.Core.Utils
         }
 
 
-        public static DbType PropertyToDatabaseType(object property, Type typeOfNullProperty = null)
+        public static DbType? PropertyToDatabaseType(object property)
         {
             if (_typeMap == null)
                 FillDatabaseTypeMapping();
@@ -214,18 +301,8 @@ namespace MySql.DataLayer.Core.Utils
             //If the property has value get type of this property by reflection
             if (property != null)
                 propertyType = property.GetType();
-            //If property value is null need to pass the type as a parameter because isn't possible to get by reflection
-            else if (property == null && typeOfNullProperty != null)
-            {
-                //If type isn't Nullable<T> transform in Nullable<T>
-                if (typeOfNullProperty.IsValueType)
-                    propertyType =  typeof(Nullable<>).MakeGenericType(typeOfNullProperty);
-                else
-                    propertyType = typeOfNullProperty;
-            }             
-            //If property and typeOfNullProperty is null it's impossible to define the type
             else
-                throw new Exception("Can't define the type");
+                return null;
 
             var hasValue = _typeMap.TryGetValue(propertyType, out result);
 
