@@ -18,4 +18,19 @@
     <ProjectReference Include="..\MySql.DataLayer.Core\MySql.DataLayer.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="GivenDatabasePatcher\Scripts\Create_AccessControl_201809211034.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="GivenDatabasePatcher\Scripts\Create_AccessControl_201809211035.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="GivenDatabasePatcher\Scripts\Create_AccessControl_201809211204.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="GivenDatabasePatcher\Scripts\Create_AccessControl_201809212505.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
