@@ -143,7 +143,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository
 
         public static string GetConnectionString()
         {
-            return  $@"Server={Environment.GetEnvironmentVariable("MYSQL_HOST")};User=root;Password=admin;";
+            return  $@"Server={Environment.GetEnvironmentVariable("MYSQL_HOST")};User=root;Password=developer;";
         }
         public static string GetDatabaseNameString()
         {
