@@ -214,7 +214,6 @@ namespace MySql.DataLayer.Core.Repository
         /// <returns></returns>
         public virtual async Task<int> RemoveAsync(object id, MySqlConnection connection, MySqlTransaction transaction = null)
         {
-
             StringBuilder sql = new StringBuilder();
 
             string pkColumnName = Utilities.GetPkColumnName<TEntity>(false);
@@ -235,8 +234,50 @@ namespace MySql.DataLayer.Core.Repository
 
 
             return await connection.ExecuteAsync(sql.ToString(), parameters, transaction);
+        }
+        /// <summary>
+        /// Provides the delete statement by the Entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public virtual async Task<int> RemoveAsync(TEntity entity)
+        {
+            int result = 0;
+            using (var connection = await _connectionFactory.GetAsync())
+            {
+                result = await RemoveAsync(entity, connection);
+            }
 
+            return result;
+        }
+        /// <summary>
+        /// Provides the delete statement by the Entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        public virtual async Task<int> RemoveAsync(TEntity entity, MySqlConnection connection, MySqlTransaction transaction = null)
+        {
+            StringBuilder sql = new StringBuilder();
 
+            string pkColumnName = Utilities.GetPkColumnName<TEntity>(false);
+            object id = Utilities.GetPropertyValue(entity, pkColumnName) ;
+
+            if (string.IsNullOrEmpty(pkColumnName))
+                throw new NotImplementedException(
+                         $"ITable: {typeof(TEntity)} does not implement {typeof(PKAttribute)}."
+                     );
+
+            string tableName = Utilities.GetTableName<TEntity>();
+
+            sql.Append($"Delete from {tableName} Where {pkColumnName} = @{pkColumnName}");
+
+            DynamicParameters parameters = new DynamicParameters();
+
+            parameters.Add(pkColumnName, id);
+
+            return await connection.ExecuteAsync(sql.ToString(), parameters, transaction);
         }
         /// <summary>
         /// Provides the update statement.

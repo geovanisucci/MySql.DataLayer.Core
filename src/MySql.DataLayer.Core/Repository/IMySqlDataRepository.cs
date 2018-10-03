@@ -78,7 +78,21 @@ namespace MySql.DataLayer.Core.Repository
         /// <param name="transaction"></param>
         /// <returns></returns>
         Task<int> RemoveAsync(object id, MySqlConnection connection, MySqlTransaction transaction = null);
-           
+        /// <summary>
+        /// Provides the delete statement by the Entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        Task<int> RemoveAsync(TEntity entity);
+        /// <summary>
+        /// Provides the delete statement by the Entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="connection"></param>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        Task<int> RemoveAsync(TEntity entity, MySqlConnection connection, MySqlTransaction transaction = null);
+
         /// <summary>
         /// Provides the execution of a StoredProcedure to get a list for mapped data
         /// </summary>
