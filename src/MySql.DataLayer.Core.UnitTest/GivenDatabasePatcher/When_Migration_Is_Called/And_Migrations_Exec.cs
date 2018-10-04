@@ -29,7 +29,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenDatabasePatcher.When_Migration_Is_C
         [Test]
         public void Should_Return_Success()
         {
-            var scriptsFolder = Path.GetDirectoryName (this.GetType ().Assembly.Location) + @"\GivenDatabasePatcher\Scripts";
+            var scriptsFolder = Path.Combine(Path.GetDirectoryName (this.GetType ().Assembly.Location), "GivenDatabasePatcher", "Scripts");
 
             
             //Path.Combine (, "GivenDatabasePatcher", "Scripts", migration.GetType ().Name + suffix + ".sql"));
