@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <PackageId>MySqlDataLayer.Core</PackageId>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <Authors>Geovani Sajorato</Authors>
     <Company>Sajorato Labs</Company>
   </PropertyGroup>
