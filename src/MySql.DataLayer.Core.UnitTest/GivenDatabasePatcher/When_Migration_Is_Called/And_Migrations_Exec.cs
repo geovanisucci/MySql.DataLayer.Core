@@ -5,6 +5,7 @@ using MySql.DataLayer.Core.UnitTest.GivenRepository;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace MySql.DataLayer.Core.UnitTest.GivenDatabasePatcher.When_Migration_Is_Called
@@ -28,8 +29,10 @@ namespace MySql.DataLayer.Core.UnitTest.GivenDatabasePatcher.When_Migration_Is_C
         [Test]
         public void Should_Return_Success()
         {
-            var scriptsFolder = @AppDomain.CurrentDomain.BaseDirectory + @"GivenDatabasePatcher\Scripts";
+            var scriptsFolder = Path.GetDirectoryName (this.GetType ().Assembly.Location) + @"\GivenDatabasePatcher\Scripts";
 
+            
+            //Path.Combine (, "GivenDatabasePatcher", "Scripts", migration.GetType ().Name + suffix + ".sql"));
             migration.ExecuteMigrations(scriptsFolder);
 
             string sqlCommand = $"SELECT IFNULL((SELECT 1 FROM information_schema.tables WHERE table_schema = '{Database.GetDatabaseNameString()}' AND table_name = '_DatabaseMigrations' LIMIT 1),0) as TableExist;";
