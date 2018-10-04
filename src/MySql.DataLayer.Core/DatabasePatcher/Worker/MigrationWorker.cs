@@ -52,7 +52,7 @@ namespace MySql.DataLayer.Core.DatabasePatcher.Worker
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -87,7 +87,7 @@ namespace MySql.DataLayer.Core.DatabasePatcher.Worker
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -107,7 +107,7 @@ namespace MySql.DataLayer.Core.DatabasePatcher.Worker
 
                 return lstResult;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
@@ -134,7 +134,7 @@ namespace MySql.DataLayer.Core.DatabasePatcher.Worker
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }

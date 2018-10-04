@@ -30,9 +30,7 @@ namespace MySql.DataLayer.Core.UnitTest.GivenDatabasePatcher.When_Migration_Is_C
         public void Should_Return_Success()
         {
             var scriptsFolder = Path.Combine(Path.GetDirectoryName (this.GetType ().Assembly.Location), "GivenDatabasePatcher", "Scripts");
-
             
-            //Path.Combine (, "GivenDatabasePatcher", "Scripts", migration.GetType ().Name + suffix + ".sql"));
             migration.ExecuteMigrations(scriptsFolder);
 
             string sqlCommand = $"SELECT IFNULL((SELECT 1 FROM information_schema.tables WHERE table_schema = '{Database.GetDatabaseNameString()}' AND table_name = '_DatabaseMigrations' LIMIT 1),0) as TableExist;";
