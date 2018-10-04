@@ -14,7 +14,6 @@ namespace MySql.DataLayer.Core.UnitTest.GivenRepository.When_CreateAsync_Is_Call
 
     public class And_Create_Happens
     {
-
         IMySqlConnectionFactory _connectionFactory;
         Repository _repository;
 

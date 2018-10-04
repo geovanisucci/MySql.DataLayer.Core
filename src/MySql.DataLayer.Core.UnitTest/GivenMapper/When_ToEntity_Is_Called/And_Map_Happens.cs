@@ -4,24 +4,26 @@ namespace MySql.DataLayer.Core.UnitTest.GivenMapper.When_ToEntity_Is_Called
     using System;
     using MySql.DataLayer.Core.UnitTest.GivenMapper.DTO;
     using MySql.DataLayer.Core.Mapper;
+    using MySql.DataLayer.Core.UnitTest.GivenMapper.Entities;
+
     public class And_Map_Happens
     {
-         GivenMapper.DTO.FooDTO _fooDTO;
+         FooDTO _fooDTO;
         [SetUp]
         public void Setup()
         {
-            _fooDTO = new GivenMapper.DTO.FooDTO()
+            _fooDTO = new FooDTO()
             {
                 id = Guid.NewGuid(),
-                Description = "Test From DataEntity"
+                Description = "Test to DataEntity"
             };
         }
 
         [Test]
-        public void Should_Return_DTO()
+        public void Should_Return_DataEntity()
         {
-            GivenMapper.Entities.FooEntity entity = null;
-            entity = Map.ToEntity<FooDTO,GivenMapper.Entities.FooEntity>(_fooDTO); 
+            FooEntity entity = null;
+            entity = Map.ToEntity<FooDTO,FooEntity>(_fooDTO); 
 
             Assert.IsNotNull(entity);
 

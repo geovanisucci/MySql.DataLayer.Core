@@ -206,6 +206,11 @@ namespace MySql.DataLayer.Core.Utils
             return pkName;
         }
 
+        public static object GetPropertyValue(object obj, string propName)
+        {
+            return obj.GetType().GetProperty(propName).GetValue(obj, null);
+        }
+
         public static string GetColumnsToSearch(ColumnTable[] columns)
         {
             string result = "*";
@@ -269,11 +274,9 @@ namespace MySql.DataLayer.Core.Utils
         {
             List<PropertyInfo> properties = null;
 
-
             if (properties == null)
             {
                 properties = type.GetProperties().ToList();
-
             }
 
             return properties;
